@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshMart - Quản Lý Mặt Hàng Siêu Thị</title>
+    <meta name="description" content="Hệ thống quản lý hàng hoá siêu thị thông minh, hiện đại và tối ưu trên mọi màn hình.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Mobile Menu -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="ph-fill ph-storefront"></i>
+                    <span>FreshMart</span>
+                </div>
+                <button class="close-sidebar" id="closeSidebarBtn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <i class="ph ph-package"></i>
+                    <span>Sản phẩm</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ph ph-list-dashes"></i>
+                    <span>Danh mục</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ph ph-chart-line-up"></i>
+                    <span>Thống kê</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ph ph-gear"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </nav>
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=4F46E5&color=fff" alt="User Profile" class="avatar">
+                <div class="user-info">
+                    <p class="user-name">Quản trị viên</p>
+                    <p class="user-role">admin@freshmart.vn</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-btn" id="menuBtn">
+                        <i class="ph ph-list"></i>
+                    </button>
+                    <h1>Quản lý sản phẩm</h1>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn">
+                        <i class="ph ph-bell"></i>
+                    </button>
+                    <button class="btn btn-primary" id="openAddModalBtn">
+                        <i class="ph ph-plus"></i>
+                        <span>Thêm mới</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm...">
+                    </div>
+                    <div class="filter-box">
+                        <select id="categoryFilter">
+                            <option value="All">Tất cả danh mục</option>
+                            <option value="Trái cây">Trái cây</option>
+                            <option value="Rau củ">Rau củ</option>
+                            <option value="Thịt">Thịt cá</option>
+                            <option value="Đồ uống">Đồ uống</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="product-grid" id="productGrid">
+                    <!-- Products will be injected here by JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Thêm sản phẩm mới</h2>
+                <button class="close-modal" id="closeModalBtn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    <div class="form-group">
+                        <label for="productName">Tên sản phẩm ✨</label>
+                        <input type="text" id="productName" required placeholder="VD: Táo xanh nhập khẩu">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productPrice">Giá bán (VNĐ) ✨</label>
+                            <input type="number" id="productPrice" required placeholder="VD: 50000">
+                        </div>
+                        <div class="form-group">
+                            <label for="productStock">Tồn kho ✨</label>
+                            <input type="number" id="productStock" required placeholder="VD: 100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Danh mục</label>
+                        <select id="productCategory">
+                            <option value="Trái cây">Trái cây</option>
+                            <option value="Rau củ">Rau củ</option>
+                            <option value="Thịt">Thịt cá</option>
+                            <option value="Đồ uống">Đồ uống</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImage">URL Hình ảnh</label>
+                        <input type="url" id="productImage" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelModalBtn">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu sản phẩm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="ph ph-check-circle"></i>
+        <span id="toastMsg">Thành công!</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
