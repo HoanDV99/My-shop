@@ -36,7 +36,10 @@ export function MobileCartDrawer({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Drawer from bottom */}
-      <div className="animate-slide-up absolute bottom-0 left-0 right-0 bg-surface rounded-t-3xl max-h-[80vh] flex flex-col border-t border-border shadow-2xl pb-[env(safe-area-inset-bottom)]">
+      <div 
+        className="animate-slide-up absolute bottom-0 left-0 right-0 bg-surface rounded-t-3xl max-h-[85vh] flex flex-col border-t border-border shadow-2xl"
+        style={{ paddingBottom: 'var(--sab)' }}
+      >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-border" />
@@ -112,7 +115,7 @@ export function MobileCartDrawer({
 
         {/* Checkout */}
         {items.length > 0 && (
-          <div className="border-t border-border p-5 space-y-3 bg-surface">
+          <div className="border-t border-border p-6 space-y-4 bg-surface shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
             <div className="flex items-center justify-between">
               <span className="text-muted text-sm">Tổng cộng</span>
               <span className="text-xl font-extrabold gradient-text">{formatVND(totalAmount)}</span>
