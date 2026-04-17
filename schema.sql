@@ -20,6 +20,7 @@ CREATE TABLE products (
   current_cost_price BIGINT NOT NULL DEFAULT 0,
   current_selling_price BIGINT NOT NULL DEFAULT 0,
   stock INT NOT NULL DEFAULT 0,
+  image_url TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now()
 );

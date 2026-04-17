@@ -14,6 +14,7 @@ export interface Product {
   current_cost_price: number
   current_selling_price: number
   stock: number
+  image_url?: string | null
   is_active: boolean
   created_at: string
   categories?: Category

@@ -24,6 +24,13 @@ export default function ProductsPage() {
   const [formCostPrice, setFormCostPrice] = useState('')
   const [formSellingPrice, setFormSellingPrice] = useState('')
   const [formStock, setFormStock] = useState('')
+  const [formImage, setFormImage] = useState('')
+
+  // Image upload state
+  const [imageMode, setImageMode] = useState<'url' | 'upload'>('url')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -54,6 +61,10 @@ export default function ProductsPage() {
     setFormCostPrice('')
     setFormSellingPrice('')
     setFormStock('0')
+    setFormImage('')
+    setImageMode('url')
+    setImageFile(null)
+    setImagePreview(null)
     setShowModal(true)
   }
 
@@ -65,6 +76,10 @@ export default function ProductsPage() {
     setFormCostPrice(product.current_cost_price.toString())
     setFormSellingPrice(product.current_selling_price.toString())
     setFormStock(product.stock.toString())
+    setFormImage(product.image_url || '')
+    setImageMode(product.image_url ? 'url' : 'upload')
+    setImageFile(null)
+    setImagePreview(product.image_url || null)
     setShowModal(true)
   }
 
@@ -72,13 +87,42 @@ export default function ProductsPage() {
     if (!formName.trim() || !formSellingPrice) return
     setSaving(true)
 
+    let finalImageUrl = formImage.trim() || null
+
+    if (imageMode === 'upload' && imageFile) {
+      setUploadingImage(true)
+      try {
+        const fileExt = imageFile.name.split('.').pop()
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+        const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, imageFile)
+        
+        if (uploadError) {
+          if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('Object not found')) {
+            throw new Error('Vui lòng tạo bucket "product-images" (Public) trên Supabase')
+          }
+          throw uploadError
+        }
+
+        const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(fileName)
+        finalImageUrl = publicUrlData.publicUrl
+      } catch (err: any) {
+        setSaving(false)
+        setUploadingImage(false)
+        console.error('Upload err:', err)
+        showToastMsg(`❌ Lỗi tải ảnh: ${err.message}`)
+        return
+      }
+      setUploadingImage(false)
+    }
+
     const data = {
       name: formName.trim(),
       alias: formAlias.trim() || null,
       category_id: formCategory || null,
-      current_cost_price: parseInt(formCostPrice) || 0,
-      current_selling_price: parseInt(formSellingPrice) || 0,
+      current_cost_price: parseInt(formCostPrice.replace(/\D/g, '')) || 0,
+      current_selling_price: parseInt(formSellingPrice.replace(/\D/g, '')) || 0,
       stock: parseInt(formStock) || 0,
+      image_url: finalImageUrl,
     }
 
     try {
@@ -111,6 +155,30 @@ export default function ProductsPage() {
       .eq('id', product.id)
     await fetchData()
     showToastMsg(product.is_active ? '⏸️ Đã ẩn sản phẩm' : '▶️ Đã hiện sản phẩm')
+  }
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      setImagePreview(URL.createObjectURL(file))
+      setFormImage('')
+    }
+  }
+
+  const clearImage = () => {
+    setImageFile(null)
+    setImagePreview(null)
+    setFormImage('')
+  }
+
+  const handlePriceInput = (setter: React.Dispatch<React.SetStateAction<string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, '')
+    if (!rawValue) {
+      setter('')
+    } else {
+      setter(parseInt(rawValue, 10).toLocaleString('vi-VN'))
+    }
   }
 
   const filtered = searchQuery ? searchProducts(products, searchQuery) : products
@@ -167,11 +235,18 @@ export default function ProductsPage() {
                   !product.is_active ? 'opacity-50' : ''
                 }`}
               >
-                {/* Category color dot */}
-                <div
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: product.categories?.color || '#6b7280' }}
-                />
+                {/* Thumbnail / Category color */}
+                {product.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={product.image_url} alt={product.name} className="w-10 h-10 rounded-lg object-cover shrink-0 border border-border" />
+                ) : (
+                  <div
+                    className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center text-white font-bold text-lg"
+                    style={{ backgroundColor: product.categories?.color || '#6b7280' }}
+                  >
+                    {product.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -272,14 +347,69 @@ export default function ProductsPage() {
                 </select>
               </div>
 
+              {/* Image Input */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-medium text-muted">Hình ảnh sản phẩm</label>
+                  <div className="flex bg-surface-hover rounded-lg p-0.5">
+                    <button
+                      onClick={() => setImageMode('url')}
+                      className={`px-2 py-1 text-[10px] font-medium rounded-md transition-colors ${imageMode === 'url' ? 'bg-surface text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}
+                    >
+                      URL
+                    </button>
+                    <button
+                      onClick={() => setImageMode('upload')}
+                      className={`px-2 py-1 text-[10px] font-medium rounded-md transition-colors ${imageMode === 'upload' ? 'bg-surface text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}
+                    >
+                      Upload / Chụp
+                    </button>
+                  </div>
+                </div>
+
+                {imageMode === 'url' ? (
+                  <input
+                    type="url"
+                    value={formImage}
+                    onChange={(e) => {
+                      setFormImage(e.target.value)
+                      setImagePreview(e.target.value)
+                    }}
+                    placeholder="https://example.com/image.png"
+                    className="w-full px-4 py-2 bg-surface-hover border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
+                  />
+                ) : (
+                  <div className="flex gap-2">
+                    <label className="flex-1 btn-press flex items-center justify-center gap-2 py-2 bg-surface-hover border border-border rounded-xl text-sm cursor-pointer hover:bg-surface transition-colors">
+                      <span>📁 File</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+                    </label>
+                    <label className="flex-1 btn-press flex items-center justify-center gap-2 py-2 bg-surface-hover border border-border rounded-xl text-sm cursor-pointer hover:bg-surface transition-colors">
+                      <span>📸 Chụp</span>
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageFileChange} />
+                    </label>
+                  </div>
+                )}
+
+                {/* Preview */}
+                {imagePreview && (
+                  <div className="mt-2 w-full h-32 rounded-xl overflow-hidden bg-surface-hover border border-border flex items-center justify-center relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imagePreview} alt="Preview" className="max-w-full max-h-full object-contain" />
+                    <button onClick={clearImage} className="absolute top-1 right-1 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center text-xs hover:bg-black transition-colors">✕</button>
+                  </div>
+                )}
+              </div>
+
               {/* Prices */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-muted mb-1.5">Giá vốn (đ)</label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={formCostPrice}
-                    onChange={(e) => setFormCostPrice(e.target.value)}
+                    onChange={handlePriceInput(setFormCostPrice)}
                     placeholder="0"
                     className="w-full px-4 py-2.5 bg-surface-hover border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
                   />
@@ -287,9 +417,10 @@ export default function ProductsPage() {
                 <div>
                   <label className="block text-xs font-medium text-muted mb-1.5">Giá bán (đ) *</label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={formSellingPrice}
-                    onChange={(e) => setFormSellingPrice(e.target.value)}
+                    onChange={handlePriceInput(setFormSellingPrice)}
                     placeholder="0"
                     className="w-full px-4 py-2.5 bg-surface-hover border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
                   />
@@ -320,9 +451,9 @@ export default function ProductsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving || !formName.trim() || !formSellingPrice}
-                className="btn-press flex-[2] py-3 bg-gradient-to-r from-accent to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-accent/25 disabled:opacity-50"
+                className="btn-press flex-[2] py-3 bg-gradient-to-r from-accent to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-accent/25 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {saving ? 'Đang lưu...' : editProduct ? 'Cập nhật' : 'Thêm mới'}
+                {saving ? (uploadingImage ? 'Đang tải ảnh...' : 'Đang lưu...') : editProduct ? 'Cập nhật' : 'Thêm mới'}
               </button>
             </div>
           </div>
