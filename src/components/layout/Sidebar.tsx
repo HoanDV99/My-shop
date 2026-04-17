@@ -7,6 +7,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 const NAV_ITEMS = [
   { href: '/pos', icon: '🛒', label: 'Bán hàng' },
   { href: '/products', icon: '📋', label: 'Sản phẩm' },
+  { href: '/categories', icon: '🏷️', label: 'Danh mục' },
   { href: '/inventory', icon: '📦', label: 'Nhập hàng' },
   { href: '/reports', icon: '📊', label: 'Báo cáo' },
 ]

@@ -144,6 +144,21 @@ export default function POSPage() {
           .eq('id', item.product.id)
       }
 
+      // Record export history
+      const exportItems = cartItems.map((item) => ({
+        product_id: item.product.id,
+        quantity: item.quantity,
+        reason: 'Bán qua POS'
+      }))
+      
+      const { error: exportError } = await supabase
+        .from('stock_exports')
+        .insert(exportItems)
+        
+      if (exportError) {
+        console.warn('Bạn chưa tạo bảng stock_exports trên máy chủ hoặc có lỗi:', exportError.message || exportError)
+      }
+
       // Refresh products to get new stock
       const { data: refreshed } = await supabase
         .from('products')

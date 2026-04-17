@@ -46,6 +46,16 @@ export interface StockImport {
   product_id: string
   quantity: number
   cost_price: number
+  supplier: string | null
+  created_at: string
+  products?: Product
+}
+
+export interface StockExport {
+  id: string
+  product_id: string
+  quantity: number
+  reason: string | null
   created_at: string
   products?: Product
 }

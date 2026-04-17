@@ -48,6 +48,16 @@ CREATE TABLE stock_imports (
   product_id UUID REFERENCES products(id) ON DELETE CASCADE,
   quantity INT NOT NULL,
   cost_price BIGINT NOT NULL,
+  supplier TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Bảng lịch sử xuất kho
+CREATE TABLE stock_exports (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  quantity INT NOT NULL,
+  reason TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -63,12 +73,14 @@ ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stock_imports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stock_exports ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow all" ON categories FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON products FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON orders FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON order_items FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON stock_imports FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all" ON stock_exports FOR ALL USING (true) WITH CHECK (true);
 
 -- ================================================
 -- Seed Data

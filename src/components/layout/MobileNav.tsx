@@ -7,6 +7,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 const NAV_ITEMS = [
   { href: '/pos', icon: '🛒', label: 'Bán hàng' },
   { href: '/products', icon: '📋', label: 'Sản phẩm' },
+  { href: '/categories', icon: '🏷️', label: 'Danh mục' },
   { href: '/inventory', icon: '📦', label: 'Nhập hàng' },
   { href: '/reports', icon: '📊', label: 'Báo cáo' },
 ]
@@ -23,7 +24,7 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${
+              className={`flex flex-col items-center justify-center gap-0.5 py-1.5 px-1.5 rounded-xl transition-all duration-200 flex-1 min-w-[48px] max-w-[70px] ${
                 isActive
                   ? 'text-accent-hover'
                   : 'text-muted'

@@ -30,7 +30,7 @@
   --glass-border: rgba(0, 0, 0, 0.08);
 }
 
-:root[data-theme='dark'] {
+.dark {
   /* Dark theme */
   --background: #0f1117;
   --foreground: #e8eaed;

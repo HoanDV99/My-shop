@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <body className="h-full flex bg-background text-foreground font-sans antialiased">
-        <ThemeProvider attribute="data-theme" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {/* Sidebar — desktop only */}
           <Sidebar />
 
