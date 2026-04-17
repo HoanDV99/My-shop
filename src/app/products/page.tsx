@@ -4,14 +4,18 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Product, Category } from '@/lib/types'
 import { formatVND, searchProducts } from '@/lib/utils'
+import { useProducts, useCategories } from '@/lib/hooks/queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function ProductsPage() {
   const supabase = createClient()
 
-  const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const queryClient = useQueryClient()
+  const { data: categories = [], isLoading: loadingCats } = useCategories()
+  const { data: products = [], isLoading: loadingProds } = useProducts(false)
+  const loading = loadingCats || loadingProds
+
   const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [viewProduct, setViewProduct] = useState<Product | null>(null)
@@ -33,21 +37,7 @@ export default function ProductsPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
 
-  useEffect(() => {
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  async function fetchData() {
-    setLoading(true)
-    const [{ data: cats }, { data: prods }] = await Promise.all([
-      supabase.from('categories').select('*').order('sort_order'),
-      supabase.from('products').select('*, categories(*)').order('name'),
-    ])
-    setCategories(cats || [])
-    setProducts(prods || [])
-    setLoading(false)
-  }
+  // fetch logic handled by Query hooks
 
   function showToastMsg(msg: string) {
     setToast(msg)
@@ -140,7 +130,8 @@ export default function ProductsPage() {
         showToastMsg('✅ Đã thêm sản phẩm mới')
       }
       setShowModal(false)
-      await fetchData()
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['categories'] })
     } catch (error) {
       console.error(error)
       showToastMsg('❌ Lỗi, vui lòng thử lại')
@@ -154,7 +145,7 @@ export default function ProductsPage() {
       .from('products')
       .update({ is_active: !product.is_active })
       .eq('id', product.id)
-    await fetchData()
+    await queryClient.invalidateQueries({ queryKey: ['products'] })
     showToastMsg(product.is_active ? '⏸️ Đã ẩn sản phẩm' : '▶️ Đã hiện sản phẩm')
   }
 

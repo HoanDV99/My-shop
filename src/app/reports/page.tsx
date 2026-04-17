@@ -4,63 +4,20 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Order, OrderItem } from '@/lib/types'
 import { formatVND, formatDateTime, formatDate } from '@/lib/utils'
+import { useOrdersReport } from '@/lib/hooks/queries'
 
 type DateRange = 'today' | '7days' | '30days' | 'all'
 
 export default function ReportsPage() {
   const supabase = createClient()
 
-  const [orders, setOrders] = useState<Order[]>([])
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
-  const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState<DateRange>('today')
 
-  useEffect(() => {
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange])
+  const { data, isLoading: loading } = useOrdersReport(dateRange)
+  const orders = data?.orders || []
+  const orderItems = data?.orderItems || []
 
-  async function fetchData() {
-    setLoading(true)
-
-    let fromDate: string | null = null
-    const now = new Date()
-
-    if (dateRange === 'today') {
-      const start = new Date(now)
-      start.setHours(0, 0, 0, 0)
-      fromDate = start.toISOString()
-    } else if (dateRange === '7days') {
-      const start = new Date(now)
-      start.setDate(start.getDate() - 7)
-      fromDate = start.toISOString()
-    } else if (dateRange === '30days') {
-      const start = new Date(now)
-      start.setDate(start.getDate() - 30)
-      fromDate = start.toISOString()
-    }
-
-    let ordersQuery = supabase.from('orders').select('*').order('created_at', { ascending: false })
-    if (fromDate) {
-      ordersQuery = ordersQuery.gte('created_at', fromDate)
-    }
-
-    const { data: ordersData } = await ordersQuery
-    const orderIds = (ordersData || []).map((o: Order) => o.id)
-
-    let itemsData: OrderItem[] = []
-    if (orderIds.length > 0) {
-      const { data } = await supabase
-        .from('order_items')
-        .select('*, products(name)')
-        .in('order_id', orderIds)
-      itemsData = data || []
-    }
-
-    setOrders(ordersData || [])
-    setOrderItems(itemsData)
-    setLoading(false)
-  }
+  // fetching handled by react-query hook
 
   // Computed stats
   const stats = useMemo(() => {

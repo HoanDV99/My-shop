@@ -4,6 +4,7 @@ import './globals.css'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import QueryProvider from '@/lib/providers/QueryProvider'
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -29,18 +30,20 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <body className="h-full flex bg-background text-foreground font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          {/* Sidebar — desktop only */}
-          <Sidebar />
+        <QueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+            {/* Sidebar — desktop only */}
+            <Sidebar />
 
-          {/* Main content area */}
-          <main className="flex-1 flex flex-col min-h-full overflow-hidden pb-16 lg:pb-0 relative z-0">
-            {children}
-          </main>
+            {/* Main content area */}
+            <main className="flex-1 flex flex-col min-h-full overflow-hidden pb-16 lg:pb-0 relative z-0">
+              {children}
+            </main>
 
-          {/* Bottom navigation — mobile only */}
-          <MobileNav />
-        </ThemeProvider>
+            {/* Bottom navigation — mobile only */}
+            <MobileNav />
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   )

@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Category } from '@/lib/types'
+import { useCategories } from '@/lib/hooks/queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function CategoriesPage() {
   const supabase = createClient()
 
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
+  const { data: categories = [], isLoading } = useCategories()
+  const loading = isLoading
   const [showModal, setShowModal] = useState(false)
   const [editCategory, setEditCategory] = useState<Category | null>(null)
   const [saving, setSaving] = useState(false)
@@ -20,17 +23,7 @@ export default function CategoriesPage() {
   const [formColor, setFormColor] = useState('#6366f1')
   const [formSortOrder, setFormSortOrder] = useState('0')
 
-  useEffect(() => {
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  async function fetchData() {
-    setLoading(true)
-    const { data: cats } = await supabase.from('categories').select('*, products(count)').order('sort_order', { ascending: true })
-    setCategories(cats || [])
-    setLoading(false)
-  }
+  // fetch handled by react-query hook
 
   function showToastMsg(msg: string) {
     setToast(msg)
@@ -80,7 +73,7 @@ export default function CategoriesPage() {
         showToastMsg('✅ Đã thêm danh mục mới')
       }
       setShowModal(false)
-      await fetchData()
+      await queryClient.invalidateQueries({ queryKey: ['categories'] })
     } catch (error) {
       console.error(error)
       showToastMsg('❌ Lỗi, vui lòng thử lại')

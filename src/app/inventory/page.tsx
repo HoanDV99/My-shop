@@ -4,16 +4,20 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Product, StockImport, StockExport } from '@/lib/types'
 import { formatVND, formatDateTime, searchProducts } from '@/lib/utils'
+import { useProducts, useStockImports, useStockExports } from '@/lib/hooks/queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function InventoryPage() {
   const supabase = createClient()
 
+  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'import' | 'export' | 'balance'>('import')
 
-  const [products, setProducts] = useState<Product[]>([])
-  const [recentImports, setRecentImports] = useState<StockImport[]>([])
-  const [recentExports, setRecentExports] = useState<StockExport[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: products = [], isLoading: isLoadingProds } = useProducts(false)
+  const { data: recentImports = [], isLoading: isLoadingImports } = useStockImports()
+  const { data: recentExports = [], isLoading: isLoadingExports } = useStockExports()
+  const loading = isLoadingProds || isLoadingImports || isLoadingExports
+
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -30,31 +34,7 @@ export default function InventoryPage() {
   const [exportQuantity, setExportQuantity] = useState('')
   const [exportReason, setExportReason] = useState('')
 
-  useEffect(() => {
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  async function fetchData() {
-    setLoading(true)
-    const [{ data: prods }, { data: imports }, { data: exports }] = await Promise.all([
-      supabase.from('products').select('*, categories(*)').order('name'),
-      supabase
-        .from('stock_imports')
-        .select('*, products(name)')
-        .order('created_at', { ascending: false })
-        .limit(20),
-      supabase
-        .from('stock_exports')
-        .select('*, products(name)')
-        .order('created_at', { ascending: false })
-        .limit(20),
-    ])
-    setProducts(prods || [])
-    setRecentImports(imports || [])
-    setRecentExports(exports || [])
-    setLoading(false)
-  }
+  // fetchlogic replaced by react query hooks
 
   function showToastMsg(msg: string) {
     setToast(msg)
@@ -115,7 +95,8 @@ export default function InventoryPage() {
       setImportQuantity('')
       setImportCostPrice('')
       setImportSupplier('')
-      await fetchData()
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['stock_imports'] })
     } catch (error) {
       console.error(error)
       showToastMsg('❌ Lỗi nhập hàng')
@@ -162,7 +143,8 @@ export default function InventoryPage() {
       setSelectedProduct(null)
       setExportQuantity('')
       setExportReason('')
-      await fetchData()
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['stock_exports'] })
     } catch (error: any) {
       console.error(error)
       showToastMsg(error.message || '❌ Lỗi xuất hàng')

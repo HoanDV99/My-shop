@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Product, Category, CartItem } from '@/lib/types'
+import { Product, Category } from '@/lib/types'
 import { searchProducts } from '@/lib/utils'
+import { useProducts, useCategories } from '@/lib/hooks/queries'
+import { useCartStore } from '@/lib/store/useCartStore'
+import { useQueryClient } from '@tanstack/react-query'
 import { CategoryTabs } from '@/components/pos/CategoryTabs'
 import { SearchBar } from '@/components/pos/SearchBar'
 import { ProductGrid } from '@/components/pos/ProductGrid'
@@ -15,39 +18,25 @@ import { MobileCartDrawer } from '@/components/pos/MobileCartDrawer'
 export default function POSPage() {
   const supabase = createClient()
 
+  const queryClient = useQueryClient()
+
   // Data
-  const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: categories = [], isLoading: isLoadingCategories } = useCategories()
+  const { data: products = [], isLoading: isLoadingProducts } = useProducts(true)
+  const loading = isLoadingCategories || isLoadingProducts
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
-  // Cart
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  // Cart from Zustand
+  const { items: cartItems, addToCart, updateQuantity, removeFromCart, clearCart } = useCartStore()
 
   // UI state
   const [showCheckout, setShowCheckout] = useState(false)
   const [showMobileCart, setShowMobileCart] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
-
-  // Fetch data
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true)
-      const [{ data: cats }, { data: prods }] = await Promise.all([
-        supabase.from('categories').select('*').order('sort_order'),
-        supabase.from('products').select('*, categories(*)').eq('is_active', true).order('name'),
-      ])
-      setCategories(cats || [])
-      setProducts(prods || [])
-      setLoading(false)
-    }
-    fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   // Filter products
   const filteredProducts = (() => {
@@ -61,39 +50,8 @@ export default function POSPage() {
     return result
   })()
 
-  // Cart actions
-  const addToCart = useCallback((product: Product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id)
-      if (existing) {
-        if (existing.quantity >= product.stock) return prev
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
-      return [...prev, { product, quantity: 1 }]
-    })
-  }, [])
-
-  const updateQuantity = useCallback((productId: string, delta: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.product.id === productId
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    )
-  }, [])
-
-  const removeFromCart = useCallback((productId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.product.id !== productId))
-  }, [])
-
-  const clearCart = useCallback(() => {
-    setCartItems([])
-  }, [])
+  // Cart actions are handled by Zustand hook now.
+  // We don't need to re-implement them, they are destructured above.
 
   // Show toast
   const showToast = useCallback((message: string) => {
@@ -159,16 +117,13 @@ export default function POSPage() {
         console.warn('Bạn chưa tạo bảng stock_exports trên máy chủ hoặc có lỗi:', exportError.message || exportError)
       }
 
-      // Refresh products to get new stock
-      const { data: refreshed } = await supabase
-        .from('products')
-        .select('*, categories(*)')
-        .eq('is_active', true)
-        .order('name')
-      setProducts(refreshed || [])
+      // Refresh products and other related caches
+      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['stock_exports'] })
+      await queryClient.invalidateQueries({ queryKey: ['orders_report'] })
 
       // Clear cart & close modal
-      setCartItems([])
+      clearCart()
       setShowCheckout(false)
       setShowMobileCart(false)
       showToast('✅ Thanh toán thành công!')
