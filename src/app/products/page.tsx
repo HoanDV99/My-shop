@@ -8,6 +8,43 @@ import { useProducts, useCategories } from '@/lib/hooks/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import { HiddenPrice } from '@/components/HiddenPrice'
 
+// Resize image using Canvas before upload (max 800x800, JPEG 85%)
+async function resizeImage(file: File, maxSize = 800, quality = 0.85): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      let { width, height } = img
+      if (width > maxSize || height > maxSize) {
+        if (width > height) {
+          height = Math.round((height * maxSize) / width)
+          width = maxSize
+        } else {
+          width = Math.round((width * maxSize) / height)
+          height = maxSize
+        }
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return reject(new Error('Canvas not supported'))
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error('Failed to resize image'))
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }))
+        },
+        'image/jpeg',
+        quality
+      )
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')) }
+    img.src = url
+  })
+}
+
 export default function ProductsPage() {
   const supabase = createClient()
 
@@ -84,9 +121,9 @@ export default function ProductsPage() {
     if (imageMode === 'upload' && imageFile) {
       setUploadingImage(true)
       try {
-        const fileExt = imageFile.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-        const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, imageFile)
+        const resizedFile = await resizeImage(imageFile)
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`
+        const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, resizedFile)
         
         if (uploadError) {
           if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('Object not found')) {

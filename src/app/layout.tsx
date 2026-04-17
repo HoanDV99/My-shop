@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import QueryProvider from '@/lib/providers/QueryProvider'
+import { PWARegister } from '@/components/layout/PWARegister'
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -14,12 +15,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'My Shop — Quản lý bán hàng',
   description: 'Hệ thống POS quản lý bán hàng tạp hóa thông minh, nhanh gọn, dễ dùng.',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'My Shop',
+  },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  themeColor: '#6366f1',
 }
 
 export default function RootLayout({
@@ -42,6 +49,7 @@ export default function RootLayout({
 
             {/* Bottom navigation — mobile only */}
             <MobileNav />
+            <PWARegister />
           </ThemeProvider>
         </QueryProvider>
       </body>
