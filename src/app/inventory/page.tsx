@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Product, StockImport, StockExport } from '@/lib/types'
 import { formatVND, formatDateTime, searchProducts } from '@/lib/utils'
+import { HiddenPrice } from '@/components/HiddenPrice'
 
 export default function InventoryPage() {
   const supabase = createClient()
@@ -243,7 +244,7 @@ export default function InventoryPage() {
                     <p className="text-sm font-semibold">{selectedProduct.name}</p>
                     <p className="text-xs text-muted">
                       Tồn kho: <span className="font-medium text-foreground">{selectedProduct.stock}</span>
-                      {' · '}Giá vốn: {formatVND(selectedProduct.current_cost_price)}
+                      {' · '}Giá vốn: <HiddenPrice value={formatVND(selectedProduct.current_cost_price)} />
                     </p>
                   </div>
                   <button onClick={() => setSelectedProduct(null)} className="text-muted hover:text-foreground">✕</button>
@@ -411,7 +412,7 @@ export default function InventoryPage() {
                <div className="text-right text-xs">
                   <p className="text-muted">Tổng đọng vốn</p>
                   <p className="font-bold text-accent text-sm">
-                    {formatVND(products.filter(p => p.is_active).reduce((acc, p) => acc + (p.stock * p.current_cost_price), 0))}
+                    <HiddenPrice value={formatVND(products.filter(p => p.is_active).reduce((acc, p) => acc + (p.stock * p.current_cost_price), 0))} />
                   </p>
                </div>
             </div>
@@ -426,13 +427,13 @@ export default function InventoryPage() {
                   <div key={p.id} className="flex items-center justify-between p-3 bg-surface-hover rounded-xl border border-transparent hover:border-border transition-colors">
                      <div>
                         <p className="text-sm font-semibold">{p.name}</p>
-                        <p className="text-xs text-muted mt-0.5">Vốn: {formatVND(p.current_cost_price)}</p>
+                        <p className="text-xs text-muted mt-0.5">Vốn: <HiddenPrice value={formatVND(p.current_cost_price)} /></p>
                      </div>
                      <div className="text-right">
                        <p className={`text-sm font-bold ${p.stock <= 5 ? 'text-danger' : 'text-foreground'}`}>
                          {p.stock} <span className="text-xs font-normal text-muted">cái</span>
                        </p>
-                       <p className="text-xs font-medium text-muted mt-0.5">{formatVND(p.stock * p.current_cost_price)}</p>
+                       <p className="text-xs font-medium text-muted mt-0.5"><HiddenPrice value={formatVND(p.stock * p.current_cost_price)} /></p>
                      </div>
                   </div>
                 ))}

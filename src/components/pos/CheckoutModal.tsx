@@ -2,6 +2,7 @@
 
 import { CartItem } from '@/lib/types'
 import { formatVND } from '@/lib/utils'
+import { HiddenPrice } from '@/components/HiddenPrice'
 
 interface CheckoutModalProps {
   items: CartItem[]
@@ -68,7 +69,7 @@ export function CheckoutModal({ items, isOpen, isProcessing, onClose, onConfirm 
         <div className="px-5 py-4 border-t border-border space-y-2 bg-surface-hover/50">
           <div className="flex justify-between text-sm text-muted">
             <span>Lợi nhuận ước tính</span>
-            <span className="text-success font-medium">+{formatVND(totalProfit)}</span>
+            <span className="text-success font-medium z-50 relative"><HiddenPrice value={`+${formatVND(totalProfit)}`} /></span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-base font-semibold">Tổng thanh toán</span>

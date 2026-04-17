@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Product, Category } from '@/lib/types'
 import { formatVND, searchProducts } from '@/lib/utils'
+import { HiddenPrice } from '@/components/HiddenPrice'
 
 export default function ProductsPage() {
   const supabase = createClient()
@@ -261,7 +262,7 @@ export default function ProductsPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-muted">
-                    <span>Vốn: {formatVND(product.current_cost_price)}</span>
+                    <span>Vốn: <HiddenPrice value={formatVND(product.current_cost_price)} /></span>
                     <span>Bán: <span className="text-accent font-medium">{formatVND(product.current_selling_price)}</span></span>
                     <span className={product.stock <= 5 ? 'text-danger' : ''}>
                       SL: {product.stock}
@@ -337,7 +338,7 @@ export default function ProductsPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted mb-1.5">Giá vốn</p>
-                    <p className="font-semibold text-foreground text-lg">{formatVND(viewProduct.current_cost_price)}</p>
+                    <p className="font-semibold text-foreground text-lg"><HiddenPrice value={formatVND(viewProduct.current_cost_price)} /></p>
                   </div>
                 </div>
 
