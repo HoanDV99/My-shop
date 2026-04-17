@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/pos', icon: '🛒', label: 'Bán hàng' },
@@ -36,6 +37,9 @@ export function MobileNav() {
             </Link>
           )
         })}
+        <div className="flex items-center justify-center min-w-[50px] shrink-0">
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   )

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/pos', icon: '🛒', label: 'Bán hàng' },
@@ -43,9 +44,9 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+      <div className="p-4 border-t border-border flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 px-1 flex-1 min-w-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
             A
           </div>
           <div className="flex-1 min-w-0">
@@ -53,6 +54,7 @@ export function Sidebar() {
             <p className="text-xs text-muted truncate">my-shop.pos</p>
           </div>
         </div>
+        <ThemeToggle />
       </div>
     </aside>
   )

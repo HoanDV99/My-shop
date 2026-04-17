@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
+import { ThemeProvider } from '@/components/ThemeProvider'
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -26,18 +27,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="vi" className={`${inter.variable} h-full`}>
+    <html lang="vi" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <body className="h-full flex bg-background text-foreground font-sans antialiased">
-        {/* Sidebar — desktop only */}
-        <Sidebar />
+        <ThemeProvider attribute="data-theme" defaultTheme="light" enableSystem={false}>
+          {/* Sidebar — desktop only */}
+          <Sidebar />
 
-        {/* Main content area */}
-        <main className="flex-1 flex flex-col min-h-full overflow-hidden pb-16 lg:pb-0">
-          {children}
-        </main>
+          {/* Main content area */}
+          <main className="flex-1 flex flex-col min-h-full overflow-hidden pb-16 lg:pb-0 relative z-0">
+            {children}
+          </main>
 
-        {/* Bottom navigation — mobile only */}
-        <MobileNav />
+          {/* Bottom navigation — mobile only */}
+          <MobileNav />
+        </ThemeProvider>
       </body>
     </html>
   )

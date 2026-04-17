@@ -15,6 +15,23 @@
 }
 
 :root {
+  /* Default light theme */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --border-color: #e2e8f0;
+  --muted: #475569;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --danger: #ef4444;
+  --success: #10b981;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme='dark'] {
+  /* Dark theme */
   --background: #0f1117;
   --foreground: #e8eaed;
   --surface: #1a1d27;
@@ -25,6 +42,8 @@
   --accent-hover: #818cf8;
   --danger: #ef4444;
   --success: #10b981;
+  --glass-bg: rgba(26, 29, 39, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
 }
 
 * {
@@ -65,10 +84,10 @@ body {
 
 /* Glass effect */
 .glass {
-  background: rgba(26, 29, 39, 0.8);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
 }
 
 /* Pulse animation for cart badge */
