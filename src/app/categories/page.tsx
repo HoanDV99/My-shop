@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Category } from '@/lib/types'
+import { Category, Product } from '@/lib/types'
 import { useCategories } from '@/lib/hooks/queries'
 import { useQueryClient } from '@tanstack/react-query'
+import { formatVND } from '@/lib/utils'
+import { ProductViewModal } from '@/components/ProductViewModal'
 
 export default function CategoriesPage() {
   const supabase = createClient()
@@ -17,6 +19,11 @@ export default function CategoriesPage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
+  const [viewCategory, setViewCategory] = useState<Category | null>(null)
+  const [categoryProducts, setCategoryProducts] = useState<Product[]>([])
+  const [loadingProducts, setLoadingProducts] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
   // Form state
   const [formName, setFormName] = useState('')
   const [formIcon, setFormIcon] = useState('')
@@ -24,6 +31,18 @@ export default function CategoriesPage() {
   const [formSortOrder, setFormSortOrder] = useState('0')
 
   // fetch handled by react-query hook
+
+  async function openViewCategory(cat: Category) {
+    setViewCategory(cat)
+    setLoadingProducts(true)
+    const { data } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category_id', cat.id)
+      .order('name')
+    setCategoryProducts(data || [])
+    setLoadingProducts(false)
+  }
 
   function showToastMsg(msg: string) {
     setToast(msg)
@@ -118,7 +137,8 @@ export default function CategoriesPage() {
             {categories.map((cat) => (
               <div
                 key={cat.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-surface border border-border hover:bg-surface-hover transition-colors"
+                onClick={() => openViewCategory(cat)}
+                className="flex items-center gap-3 p-3 rounded-xl bg-surface border border-border hover:bg-surface-hover transition-colors cursor-pointer"
               >
                 {/* Thumbnail / Category color */}
                 <div
@@ -141,7 +161,7 @@ export default function CategoriesPage() {
                 {/* Actions */}
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
-                    onClick={() => openEditModal(cat)}
+                    onClick={(e) => { e.stopPropagation(); openEditModal(cat); }}
                     className="btn-press w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-hover text-muted hover:text-foreground transition-colors text-sm"
                   >
                     ✏️
@@ -153,7 +173,77 @@ export default function CategoriesPage() {
         )}
       </div>
 
-      {/* Modal */}
+      {/* View Category Products Modal */}
+      {viewCategory && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-surface animate-fade-in">
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between pt-6 sm:pt-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+                style={{ backgroundColor: viewCategory.color || '#6b7280' }}
+              >
+                {viewCategory.icon || viewCategory.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">{viewCategory.name}</h2>
+                <p className="text-xs text-muted">{categoryProducts.length} sản phẩm</p>
+              </div>
+            </div>
+            <button onClick={() => setViewCategory(null)} className="text-muted hover:text-foreground text-lg">✕</button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-5 py-4 bg-surface">
+            {loadingProducts ? (
+              <div className="flex justify-center py-10">
+                <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : categoryProducts.length === 0 ? (
+              <div className="text-center py-10 text-muted">
+                <p className="text-4xl mb-2">📦</p>
+                <p>Danh mục này chưa có sản phẩm nào</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {categoryProducts.map(p => (
+                  <div
+                    key={p.id}
+                    onClick={() => setSelectedProduct(p)}
+                    className="flex items-center gap-3 p-3 bg-surface-hover rounded-xl border border-transparent hover:border-border transition-colors cursor-pointer"
+                  >
+                    {p.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.image_url} alt={p.name} className="w-12 h-12 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-black/10 flex items-center justify-center text-xl text-muted font-bold">
+                        {p.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{p.name}</p>
+                      <p className="text-xs text-muted mt-1">Kho: {p.stock} · Giá bán: <span className="font-medium text-accent">{formatVND(p.current_selling_price)}</span></p>
+                    </div>
+                    <div className="shrink-0">
+                      <span className={`px-2 py-1 text-[10px] font-bold rounded-md ${p.is_active ? 'bg-green-100 text-green-700' : 'bg-surface text-muted'}`}>
+                        {p.is_active ? 'Đang bán' : 'Đã ẩn'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* View Product Details Modal */}
+      {selectedProduct && (
+        <ProductViewModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
+
+      {/* Form Modal */}
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center animate-fade-in">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
