@@ -31,12 +31,12 @@ export function MobileCartDrawer({
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
-    <div className="lg:hidden fixed inset-0 z-50 animate-fade-in">
+    <div className="lg:hidden fixed inset-0 z-[100] animate-fade-in">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Drawer from bottom */}
-      <div className="animate-slide-up absolute bottom-0 left-0 right-0 bg-surface rounded-t-3xl max-h-[80vh] flex flex-col border-t border-border shadow-2xl">
+      <div className="animate-slide-up absolute bottom-0 left-0 right-0 bg-surface rounded-t-3xl max-h-[80vh] flex flex-col border-t border-border shadow-2xl pb-[env(safe-area-inset-bottom)]">
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-border" />
@@ -112,7 +112,7 @@ export function MobileCartDrawer({
 
         {/* Checkout */}
         {items.length > 0 && (
-          <div className="border-t border-border p-4 space-y-3">
+          <div className="border-t border-border p-5 space-y-3 bg-surface">
             <div className="flex items-center justify-between">
               <span className="text-muted text-sm">Tổng cộng</span>
               <span className="text-xl font-extrabold gradient-text">{formatVND(totalAmount)}</span>
