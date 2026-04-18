@@ -265,7 +265,7 @@ export default function CategoriesPage() {
 
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-bold">
-                {editCategory ? '✏️ Sửa danh mục' : 'NEW PLUS Thêm danh mục'}
+                {editCategory ? '✏️ Chỉnh sửa danh mục' : '➕ Thêm mới danh mục'}
               </h2>
               <button onClick={() => setShowModal(false)} className="text-muted hover:text-foreground text-lg">✕</button>
             </div>
@@ -333,7 +333,7 @@ export default function CategoriesPage() {
                         {CATEGORY_ICONS.map((group) => (
                           <div key={group.group} className="space-y-0.5">
                             <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest px-3 py-2 bg-surface-hover/30 sticky top-0 z-10 backdrop-blur-sm">{group.group}</h4>
-                            <div className="flex flex-col">
+                            <div className="grid grid-cols-6 gap-2 p-2">
                               {group.icons.map((icon) => (
                                 <button
                                   key={icon}
@@ -342,14 +342,13 @@ export default function CategoriesPage() {
                                     setFormIcon(icon)
                                     setIsIconDropdownOpen(false)
                                   }}
-                                  className={`w-full flex items-center gap-4 px-4 py-2.5 rounded-lg transition-all ${
+                                  className={`aspect-square flex items-center justify-center rounded-xl transition-all text-xl ${
                                     formIcon === icon 
-                                      ? 'bg-accent text-white font-bold' 
-                                      : 'hover:bg-surface-hover text-foreground/80 hover:text-foreground'
+                                      ? 'bg-accent text-white shadow-lg shadow-accent/20 scale-110 z-10' 
+                                      : 'hover:bg-surface-hover text-foreground/80 hover:text-foreground border border-transparent hover:border-border/50'
                                   }`}
                                 >
-                                  <span className="text-xl w-8 h-8 flex items-center justify-center bg-black/5 rounded-md">{icon}</span>
-                                  <span className="text-sm">Biểu tượng {icon}</span>
+                                  {icon}
                                 </button>
                               ))}
                             </div>
