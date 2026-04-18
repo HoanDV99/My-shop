@@ -37,6 +37,7 @@ export default function CategoriesPage() {
   const [formIcon, setFormIcon] = useState('')
   const [formColor, setFormColor] = useState('#6366f1')
   const [formSortOrder, setFormSortOrder] = useState('0')
+  const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false)
 
   // fetch handled by react-query hook
 
@@ -63,6 +64,7 @@ export default function CategoriesPage() {
     setFormIcon('📌')
     setFormColor('#6366f1')
     setFormSortOrder((categories.length * 10).toString())
+    setIsIconDropdownOpen(false)
     setShowModal(true)
   }
 
@@ -72,6 +74,7 @@ export default function CategoriesPage() {
     setFormIcon(category.icon || '')
     setFormColor(category.color || '#6366f1')
     setFormSortOrder((category.sort_order || 0).toString())
+    setIsIconDropdownOpen(false)
     setShowModal(true)
   }
 
@@ -262,7 +265,7 @@ export default function CategoriesPage() {
 
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-bold">
-                {editCategory ? '✏️ Sửa danh mục' : '➕ Thêm danh mục'}
+                {editCategory ? '✏️ Sửa danh mục' : 'NEW PLUS Thêm danh mục'}
               </h2>
               <button onClick={() => setShowModal(false)} className="text-muted hover:text-foreground text-lg">✕</button>
             </div>
@@ -280,54 +283,82 @@ export default function CategoriesPage() {
                 />
               </div>
 
-              {/* Icon Selection */}
-              <div>
-                <label className="block text-xs font-medium text-muted mb-2">Icon danh mục *</label>
+              {/* Icon Selection Dropdown */}
+              <div className="relative">
+                <label className="block text-xs font-medium text-muted mb-1.5">Icon danh mục *</label>
                 
-                {/* Current Selection Preview */}
-                <div className="flex items-center gap-4 mb-4">
-                  <div 
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-border"
-                    style={{ backgroundColor: `${formColor}20`, color: formColor }}
-                  >
-                    {formIcon || '❓'}
+                <button
+                  type="button"
+                  onClick={() => setIsIconDropdownOpen(!isIconDropdownOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-surface-hover border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all hover:border-accent/40"
+                >
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shadow-inner border border-border/50"
+                      style={{ backgroundColor: `${formColor}15`, color: formColor }}
+                    >
+                      {formIcon || '❓'}
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold text-foreground">
+                        {CATEGORY_ICONS.flatMap(g => g.icons).includes(formIcon) 
+                          ? `Icon: ${formIcon}` 
+                          : formIcon 
+                            ? `Custom: ${formIcon}` 
+                            : 'Chưa chọn icon'}
+                      </p>
+                      <p className="text-[10px] text-muted">Nhấn để thay đổi</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted mb-1">Đang chọn</p>
-                    <input
-                      type="text"
-                      value={formIcon}
-                      onChange={(e) => setFormIcon(e.target.value)}
-                      placeholder="Icon tùy chỉnh"
-                      className="w-full px-3 py-1.5 bg-surface-hover border border-border rounded-lg text-sm focus:outline-none"
-                    />
-                  </div>
-                </div>
+                  <span className={`text-muted transition-transform duration-300 ${isIconDropdownOpen ? 'rotate-180' : ''}`}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </span>
+                </button>
 
-                {/* Grid Picker */}
-                <div className="space-y-4 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                  {CATEGORY_ICONS.map((group) => (
-                    <div key={group.group} className="space-y-1.5">
-                      <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest pl-1">{group.group}</h4>
-                      <div className="grid grid-cols-6 gap-2">
-                        {group.icons.map((icon) => (
-                          <button
-                            key={icon}
-                            type="button"
-                            onClick={() => setFormIcon(icon)}
-                            className={`h-11 rounded-xl flex items-center justify-center text-xl transition-all ${
-                              formIcon === icon 
-                                ? 'bg-accent text-white shadow-lg shadow-accent/30 scale-110 z-10' 
-                                : 'bg-surface-hover hover:bg-border text-foreground border border-transparent'
-                            }`}
-                          >
-                            {icon}
-                          </button>
+                {isIconDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[110]" onClick={() => setIsIconDropdownOpen(false)} />
+                    <div className="absolute left-0 right-0 mt-2 z-[120] bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in origin-top">
+                      <div className="p-3 border-b border-border bg-surface-hover/50">
+                        <input
+                          type="text"
+                          value={formIcon}
+                          onChange={(e) => setFormIcon(e.target.value)}
+                          placeholder="Hoặc nhập icon/emoji tùy chỉnh..."
+                          className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-1 space-y-1">
+                        {CATEGORY_ICONS.map((group) => (
+                          <div key={group.group} className="space-y-0.5">
+                            <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest px-3 py-2 bg-surface-hover/30 sticky top-0 z-10 backdrop-blur-sm">{group.group}</h4>
+                            <div className="flex flex-col">
+                              {group.icons.map((icon) => (
+                                <button
+                                  key={icon}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormIcon(icon)
+                                    setIsIconDropdownOpen(false)
+                                  }}
+                                  className={`w-full flex items-center gap-4 px-4 py-2.5 rounded-lg transition-all ${
+                                    formIcon === icon 
+                                      ? 'bg-accent text-white font-bold' 
+                                      : 'hover:bg-surface-hover text-foreground/80 hover:text-foreground'
+                                  }`}
+                                >
+                                  <span className="text-xl w-8 h-8 flex items-center justify-center bg-black/5 rounded-md">{icon}</span>
+                                  <span className="text-sm">Biểu tượng {icon}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </div>
 
               {/* Color */}
