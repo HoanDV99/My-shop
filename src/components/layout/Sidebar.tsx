@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/categories', icon: '🏷️', label: 'Danh mục' },
   { href: '/inventory', icon: '📦', label: 'Nhập hàng' },
   { href: '/reports', icon: '📊', label: 'Báo cáo' },
+  { href: '/settings', icon: '⚙️', label: 'Cài đặt' },
 ]
 
 export function Sidebar() {
