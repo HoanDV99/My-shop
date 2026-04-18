@@ -44,7 +44,7 @@ export default function RootLayout({
             <Sidebar />
 
             {/* Main content area */}
-            <main className="flex-1 flex flex-col min-h-full overflow-hidden pb-16 lg:pb-0 relative z-0">
+            <main className="flex-1 flex flex-col min-h-full lg:pb-0 relative">
               {children}
             </main>
 

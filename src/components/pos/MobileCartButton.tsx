@@ -21,7 +21,7 @@ export function MobileCartButton({ items, onClick }: MobileCartButtonProps) {
     <button
       onClick={onClick}
       className="btn-press lg:hidden fixed left-4 right-4 z-40 flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-accent to-purple-600 text-white rounded-2xl shadow-xl shadow-accent/30 animate-slide-up"
-      style={{ bottom: 'calc(100px + var(--sab))' }}
+      style={{ bottom: 'calc(80px + var(--sab))' }}
     >
       <div className="flex items-center gap-2.5">
         <span className="text-xl">🛒</span>
