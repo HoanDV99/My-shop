@@ -6,6 +6,7 @@ import { MobileNav } from '@/components/layout/MobileNav'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import QueryProvider from '@/lib/providers/QueryProvider'
 import { PWARegister } from '@/components/layout/PWARegister'
+import { PinGuard } from '@/components/auth/PinGuard'
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -40,16 +41,18 @@ export default function RootLayout({
       <body className="h-full flex bg-background text-foreground font-sans antialiased">
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-            {/* Sidebar — desktop only */}
-            <Sidebar />
+            <PinGuard>
+              {/* Sidebar — desktop only */}
+              <Sidebar />
 
-            {/* Main content area */}
-            <main className="flex-1 flex flex-col min-h-full lg:pb-0 relative">
-              {children}
-            </main>
+              {/* Main content area */}
+              <main className="flex-1 flex flex-col min-h-full lg:pb-0 relative">
+                {children}
+              </main>
 
-            {/* Bottom navigation — mobile only */}
-            <MobileNav />
+              {/* Bottom navigation — mobile only */}
+              <MobileNav />
+            </PinGuard>
             <PWARegister />
           </ThemeProvider>
         </QueryProvider>
