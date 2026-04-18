@@ -31,10 +31,12 @@ export function MobileNav() {
               }`}
             >
               <span className="text-xl">{item.icon}</span>
-              <span className="text-[10px] font-medium">{item.label}</span>
-              {isActive && (
-                <span className="absolute bottom-3 w-5 h-0.5 rounded-full bg-accent" />
-              )}
+              <span className="text-[10px] font-medium relative">
+                {item.label}
+                {isActive && (
+                  <span className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-5 h-0.5 rounded-full bg-accent" />
+                )}
+              </span>
             </Link>
           )
         })}
