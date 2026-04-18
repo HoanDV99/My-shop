@@ -8,6 +8,14 @@ import { useQueryClient } from '@tanstack/react-query'
 import { formatVND } from '@/lib/utils'
 import { ProductViewModal } from '@/components/ProductViewModal'
 
+const CATEGORY_ICONS = [
+  { group: 'Phổ biến', icons: ['📌', '⭐', '🔥', '💎', '🎁', '🛒'] },
+  { group: 'Thực phẩm & Đồ uống', icons: ['🍎', '🥦', '🍞', '🥩', '🥚', '🍕', '🍔', '🥤', '🍦', '☕', '🍺', '🍷'] },
+  { group: 'Thời trang & Làm đẹp', icons: ['👕', '👗', '👜', '👞', '👓', '💄', '🧴', '🧼'] },
+  { group: 'Điện tử & Gia dụng', icons: ['📱', '💻', '🎧', '⚡', '🏠', '🛠️', '💡', '🧹', '🧺'] },
+  { group: 'Khác', icons: ['💊', '🧸', '⚽', '🏀', '🎨', '📚', '🌱', '🦴'] },
+]
+
 export default function CategoriesPage() {
   const supabase = createClient()
 
@@ -272,16 +280,54 @@ export default function CategoriesPage() {
                 />
               </div>
 
-              {/* Icon */}
+              {/* Icon Selection */}
               <div>
-                <label className="block text-xs font-medium text-muted mb-1.5">Icon (Emoji)</label>
-                <input
-                  type="text"
-                  value={formIcon}
-                  onChange={(e) => setFormIcon(e.target.value)}
-                  placeholder="VD: 🥤"
-                  className="w-full px-4 py-2.5 bg-surface-hover border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
-                />
+                <label className="block text-xs font-medium text-muted mb-2">Icon danh mục *</label>
+                
+                {/* Current Selection Preview */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div 
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-border"
+                    style={{ backgroundColor: `${formColor}20`, color: formColor }}
+                  >
+                    {formIcon || '❓'}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted mb-1">Đang chọn</p>
+                    <input
+                      type="text"
+                      value={formIcon}
+                      onChange={(e) => setFormIcon(e.target.value)}
+                      placeholder="Icon tùy chỉnh"
+                      className="w-full px-3 py-1.5 bg-surface-hover border border-border rounded-lg text-sm focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Grid Picker */}
+                <div className="space-y-4 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+                  {CATEGORY_ICONS.map((group) => (
+                    <div key={group.group} className="space-y-1.5">
+                      <h4 className="text-[10px] font-bold text-muted uppercase tracking-widest pl-1">{group.group}</h4>
+                      <div className="grid grid-cols-6 gap-2">
+                        {group.icons.map((icon) => (
+                          <button
+                            key={icon}
+                            type="button"
+                            onClick={() => setFormIcon(icon)}
+                            className={`h-11 rounded-xl flex items-center justify-center text-xl transition-all ${
+                              formIcon === icon 
+                                ? 'bg-accent text-white shadow-lg shadow-accent/30 scale-110 z-10' 
+                                : 'bg-surface-hover hover:bg-border text-foreground border border-transparent'
+                            }`}
+                          >
+                            {icon}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Color */}
