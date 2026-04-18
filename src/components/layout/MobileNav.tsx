@@ -33,7 +33,7 @@ export function MobileNav() {
               <span className="text-xl">{item.icon}</span>
               <span className="text-[10px] font-medium">{item.label}</span>
               {isActive && (
-                <span className="absolute -bottom-0 w-5 h-0.5 rounded-full bg-accent" />
+                <span className="absolute bottom-1 w-5 h-0.5 rounded-full bg-accent" />
               )}
             </Link>
           )
