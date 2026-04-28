@@ -68,6 +68,7 @@ export default function ProductsPage() {
   const [formSellingPrice, setFormSellingPrice] = useState('')
   const [formStock, setFormStock] = useState('')
   const [formImage, setFormImage] = useState('')
+  const [formDescription, setFormDescription] = useState('')
 
   // Image upload state
   const [imageMode, setImageMode] = useState<'url' | 'upload'>('url')
@@ -91,6 +92,7 @@ export default function ProductsPage() {
     setFormSellingPrice('')
     setFormStock('0')
     setFormImage('')
+    setFormDescription('')
     setImageMode('url')
     setImageFile(null)
     setImagePreview(null)
@@ -106,6 +108,7 @@ export default function ProductsPage() {
     setFormSellingPrice(product.current_selling_price.toString())
     setFormStock(product.stock.toString())
     setFormImage(product.image_url || '')
+    setFormDescription(product.description || '')
     setImageMode(product.image_url ? 'url' : 'upload')
     setImageFile(null)
     setImagePreview(product.image_url || null)
@@ -152,6 +155,7 @@ export default function ProductsPage() {
       current_selling_price: parseInt(formSellingPrice.replace(/\D/g, '')) || 0,
       stock: parseInt(formStock) || 0,
       image_url: finalImageUrl,
+      description: formDescription.trim() || null,
     }
 
     try {
@@ -384,6 +388,15 @@ export default function ProductsPage() {
                   </span>
                 </div>
 
+                {viewProduct.description && (
+                  <div className="pt-2">
+                    <span className="text-sm font-bold text-muted block mb-2">Mô tả sản phẩm</span>
+                    <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed bg-surface-hover p-4 rounded-xl border border-border">
+                      {viewProduct.description}
+                    </p>
+                  </div>
+                )}
+
                 {viewProduct.created_at && (
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-sm text-muted">Ngày tạo</span>
@@ -516,6 +529,18 @@ export default function ProductsPage() {
                     <button onClick={clearImage} className="absolute top-1 right-1 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center text-xs hover:bg-black transition-colors">✕</button>
                   </div>
                 )}
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-medium text-muted mb-1.5">Mô tả sản phẩm</label>
+                <textarea
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder="Nhập mô tả chi tiết sản phẩm..."
+                  rows={3}
+                  className="w-full px-4 py-2.5 bg-surface-hover border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 resize-none"
+                />
               </div>
 
               {/* Prices */}
