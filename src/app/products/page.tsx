@@ -355,7 +355,7 @@ export default function ProductsPage() {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">{viewProduct.name}</h2>
-                  {viewProduct.alias && <p className="text-base text-muted mt-2">Alias: {viewProduct.alias}</p>}
+                  {viewProduct.alias && <p className="text-base text-muted mt-2">Mã SP: {viewProduct.alias}</p>}
                 </div>
                 <span className={`px-3 py-1.5 text-sm font-semibold rounded-lg shrink-0 ml-4 ${viewProduct.is_active ? 'bg-green-100 text-green-700' : 'bg-surface-hover text-muted'}`}>
                   {viewProduct.is_active ? 'Đang bán' : 'Đã ẩn'}
@@ -450,12 +450,12 @@ export default function ProductsPage() {
 
               {/* Alias */}
               <div>
-                <label className="block text-xs font-medium text-muted mb-1.5">Tên viết tắt (alias)</label>
+                <label className="block text-xs font-medium text-muted mb-1.5">Mã sản phẩm (alias)</label>
                 <input
                   type="text"
                   value={formAlias}
                   onChange={(e) => setFormAlias(e.target.value)}
-                  placeholder="VD: coca, pepsi"
+                  placeholder="VD: SP001, COCA"
                   className="w-full px-4 py-2.5 bg-surface-hover border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </div>

@@ -41,7 +41,7 @@ export function ProductViewModal({ product, onClose, onEdit }: ProductViewModalP
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">{product.name}</h2>
-              {product.alias && <p className="text-base text-muted mt-2">Alias: {product.alias}</p>}
+              {product.alias && <p className="text-base text-muted mt-2">Mã SP: {product.alias}</p>}
             </div>
             <span className={`px-3 py-1.5 text-sm font-semibold rounded-lg shrink-0 ml-4 ${product.is_active ? 'bg-green-100 text-green-700' : 'bg-surface-hover text-muted'}`}>
               {product.is_active ? 'Đang bán' : 'Đã ẩn'}

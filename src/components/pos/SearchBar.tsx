@@ -14,7 +14,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Tìm nhanh... (tên hoặc alias)"
+        placeholder="Tìm nhanh... (tên hoặc mã SP)"
         className="w-full pl-11 pr-4 py-3 bg-surface border border-border rounded-xl text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all duration-200"
       />
       {value && (
