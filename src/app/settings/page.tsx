@@ -8,7 +8,7 @@ export default function SettingsPage() {
   const router = useRouter()
   const supabase = createClient()
   const [isDeleting, setIsDeleting] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<'resetAll' | 'deleteProducts' | null>(null)
   const [pinEntry, setPinEntry] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -51,11 +51,55 @@ export default function SettingsPage() {
       }
 
       setSuccess('✅ Toàn bộ dữ liệu đã được xóa sạch!')
-      setShowConfirm(false)
+      setConfirmAction(null)
       
       // Reload page after a delay to clear all caches
       setTimeout(() => {
         window.location.href = '/pos'
+      }, 2000)
+
+    } catch (err: any) {
+      setError('❌ Lỗi hệ thống: ' + err.message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteProducts = async () => {
+    if (pinEntry !== APP_PIN) {
+      setError('❌ Mã PIN không chính xác!')
+      setPinEntry('')
+      return
+    }
+
+    setIsDeleting(true)
+    setError('')
+
+    try {
+      // Deletion order to avoid FK constraints
+      const tables = [
+        'order_items',
+        'stock_exports',
+        'stock_imports',
+        'products'
+      ]
+
+      for (const table of tables) {
+        const { error: delError } = await supabase
+          .from(table)
+          .delete()
+          .not('id', 'is', null)
+
+        if (delError) {
+          console.error(`Error deleting ${table}:`, delError)
+        }
+      }
+
+      setSuccess('✅ Toàn bộ dữ liệu sản phẩm đã được xóa!')
+      setConfirmAction(null)
+      
+      setTimeout(() => {
+        window.location.href = '/products'
       }, 2000)
 
     } catch (err: any) {
@@ -90,6 +134,25 @@ export default function SettingsPage() {
             </div>
 
             <div className="p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+                <div>
+                  <h3 className="font-bold text-base">Xóa tất cả sản phẩm</h3>
+                  <p className="text-xs text-muted mt-1 max-w-sm">
+                    Xóa toàn bộ Sản phẩm, Lịch sử kho và các mặt hàng trong Đơn hàng. Danh mục và thông tin Đơn hàng vẫn được giữ lại.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setConfirmAction('deleteProducts')
+                    setPinEntry('')
+                    setError('')
+                  }}
+                  className="btn-press px-6 py-3 bg-danger/10 text-danger hover:bg-danger/20 font-bold rounded-xl shadow-sm transition-colors whitespace-nowrap"
+                >
+                  Xóa sản phẩm
+                </button>
+              </div>
+
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold text-base">Xóa toàn bộ dữ liệu (Factory Reset)</h3>
@@ -98,8 +161,12 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowConfirm(true)}
-                  className="btn-press px-6 py-3 bg-danger text-white font-bold rounded-xl shadow-lg shadow-danger/20 active:scale-95 transition-transform"
+                  onClick={() => {
+                    setConfirmAction('resetAll')
+                    setPinEntry('')
+                    setError('')
+                  }}
+                  className="btn-press px-6 py-3 bg-danger text-white font-bold rounded-xl shadow-lg shadow-danger/20 active:scale-95 transition-transform whitespace-nowrap"
                 >
                   Xóa tất cả
                 </button>
@@ -110,9 +177,9 @@ export default function SettingsPage() {
       </div>
 
       {/* Confirmation Modal */}
-      {showConfirm && (
+      {confirmAction && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 animate-fade-in">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !isDeleting && setShowConfirm(false)} />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => !isDeleting && setConfirmAction(null)} />
           
           <div className="relative bg-surface w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border animate-scale-in">
             <div className="text-center space-y-4">
@@ -121,7 +188,9 @@ export default function SettingsPage() {
               </div>
               <h3 className="text-2xl font-black text-danger">Xác nhận xóa!</h3>
               <p className="text-sm text-muted">
-                Hành động này sẽ xóa **vĩnh viễn** toàn bộ dữ liệu của bạn trên Supabase. Không thể khôi phục.
+                {confirmAction === 'resetAll' 
+                  ? 'Hành động này sẽ xóa **vĩnh viễn** toàn bộ dữ liệu của bạn trên Supabase. Không thể khôi phục.'
+                  : 'Hành động này sẽ xóa **vĩnh viễn** mọi sản phẩm, lịch sử kho và đơn hàng liên quan. Không thể khôi phục.'}
               </p>
               
               <div className="pt-4 space-y-4">
@@ -143,24 +212,24 @@ export default function SettingsPage() {
 
                 <div className="flex gap-3 pt-2">
                   <button
-                    onClick={() => setShowConfirm(false)}
+                    onClick={() => setConfirmAction(null)}
                     disabled={isDeleting}
                     className="flex-1 h-12 rounded-xl font-bold bg-surface-hover hover:bg-border transition-colors disabled:opacity-50"
                   >
                     Hủy bỏ
                   </button>
                   <button
-                    onClick={handleResetData}
+                    onClick={confirmAction === 'resetAll' ? handleResetData : handleDeleteProducts}
                     disabled={isDeleting || pinEntry.length < 5}
                     className="flex-[2] h-12 rounded-xl font-bold bg-danger text-white hover:bg-danger/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isDeleting ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Đang xóa...
+                        Đang xử lý...
                       </>
                     ) : (
-                      '🔥 XÁC NHẬN XÓA TẤT CẢ'
+                      confirmAction === 'resetAll' ? '🔥 XÓA TẤT CẢ DỮ LIỆU' : '🔥 XÓA TẤT CẢ SẢN PHẨM'
                     )}
                   </button>
                 </div>
